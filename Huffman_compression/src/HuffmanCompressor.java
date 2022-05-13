@@ -1,3 +1,5 @@
+import java.util.HashMap;
+import java.util.Map;
 import java.util.PriorityQueue;
 
 public class HuffmanCompressor {
@@ -8,11 +10,29 @@ public class HuffmanCompressor {
     public HuffmanEncoderResult compress(final String data) {
         final int[] freq = buildFrequencyTable(data);
         final Node root = buildHuffmanTree(freq);
+        final Map<Character,String> lookupTable = buildLookupTable(root);
+
 
         return null;
     }
 
-    
+    private static Map<Character, String> buildLookupTable(final Node root){
+
+        final Map<Character, String> lookupTable = new HashMap<>();
+        buildLookupTableImpl(root, "",lookupTable);
+        return lookupTable;
+    }
+
+    private static void buildLookupTableImpl(Node node,
+                                             String s,
+                                             Map<Character, String> lookupTable) {
+        if(!node.isLeaf()){
+            buildLookupTableImpl(node.leftChild, s+ '0',lookupTable);
+            buildLookupTableImpl(node.rightChild, s + '1',lookupTable);
+        } else {
+            lookupTable.put(node.character,s);
+        }
+    }
 
     private static Node buildHuffmanTree(int[] freq){
 
@@ -86,9 +106,10 @@ public class HuffmanCompressor {
     }
 
     public static void main(String[] args){
-        final String test = "abcdefg";
+        final String test = "abcdeffg";
         final int[] ft = buildFrequencyTable(test);
         final Node n = buildHuffmanTree(ft);
+        final Map<Character, String> lookup = buildLookupTable(n);
         System.out.println(n);
     }
 
