@@ -1,10 +1,12 @@
 import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
+import java.io.*;
+import java.util.Scanner;
 
 public class compressor {
 
-    private static final int ALPHABET_SIZE = 256;
+    private static final int ALPHABET_SIZE = 256; // on initialise l'aphabet sur un octet code ASCII
 
 
     public HuffmanEncodedResult compress(final String data) {
@@ -152,14 +154,65 @@ public class compressor {
         }
     }
 
-    public static void main(String[] args){
-        final String test = "hello world!";
-        final compressor encoder = new compressor();
-        final HuffmanEncodedResult result = encoder.compress(test);
+    public static void main(String[] args) throws IOException {
 
-        System.out.println("Le texte pas compresse est : " + encoder.decompress(result));
-        System.out.println("Le texte compresse est : " + result.encodedData);
+
+        ////////// Gestion de fichier\\\\\\\\\\\
+        String var = " ";
+        FileInputStream file = null;
+        try {
+            file = new FileInputStream("textesimple.txt");
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        Scanner scanner = new Scanner(file);
+
+        while(scanner.hasNextLine()){
+            var = var.concat(scanner.nextLine());
+        }
+        scanner.close();
+        ///////////////// FIN\\\\\\\\\\\\\\\\\\\\
+
+
+        final String texte = var ; // on choisi le texte que l'on souhaite coder
+        final compressor encoder = new compressor();
+        final HuffmanEncodedResult result = encoder.compress(texte);
+        final int[] ft = buildFrequencyTable(texte);
+        final Node n = buildHuffmanTree(ft);
+        //System.out.println("Le texte pas compresse est : " + encoder.decompress(result));
+        //System.out.println("Le texte compresse est : " + result.encodedData);
+
+
+        // calcul du taux de compression
+
+        float stringLengthUnencoded = texte.length();
+        float stringLengthEncoded = result.encodedData.length();
+        float nboctetsEncoded = stringLengthEncoded/8;
+        double nb = Math.ceil(nboctetsEncoded);
+        //System.out.println("le taux de compression est de " +  nb/stringLengthUnencoded*100 + "%");
+
+
+
+        ////// Creation du fichier texte pour conclure\\\\\\\\\\\\
+
+        File fileExit = new File("Result.txt");
+
+        if (!fileExit.exists()){
+            fileExit.createNewFile();
+        }
+
+        FileWriter fw = new FileWriter(fileExit.getAbsoluteFile());
+        BufferedWriter bw = new BufferedWriter(fw);
+        bw.write("                    VOICI LE FICHIER RESULTAT DE LA COMPRESSION DE HUFFMAN               \n ");
+        bw.write("");
+        bw.write("le taux de compression est de " +  nb/stringLengthUnencoded*100 + "%" + "\n");
+        bw.write("");
+        bw.write(" Le code compresse est : \n");
+        bw.write(result.encodedData);
+        bw.close();
+
 
     }
 
 }
+
